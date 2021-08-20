@@ -1,11 +1,15 @@
-import sys
 #使用sys的工具退出游戏
+import sys
 
-import pygame
 #包含开发游戏需要的功能
+import pygame
 
-from ship import Ship
 #加载飞船图像
+from ship import Ship
+
+#加载子弹
+from bullet import Bullet
+
 
 from settings import Settings
 
@@ -30,6 +34,8 @@ class AlienInvasion:
         pygame.display.set_caption("AlienInvasion")
 
         self.ship = Ship(self)
+        # 储存子弹的编组
+        self.bullets = pygame.sprite.Group()
 
     def _check_events(self):
         """响应案件和鼠标事件"""
@@ -54,6 +60,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
 
     def _check_keyup_events(self, event):
         """响应按键松开"""
@@ -62,6 +70,11 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
+    def _fire_bullet(self):
+        """创造一颗子弹，并将其加入编组bullets中"""
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
+
     def _update_screen(self):
         # Redraw the screen 重绘屏幕during each pass through the loop.
         #设置背景颜色
@@ -69,6 +82,10 @@ class AlienInvasion:
 
         #在指定位置绘制飞船
         self.ship.blitme()
+
+        # 更新子弹图像
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
 
         # Make the most recently drawn screen visible.
         pygame.display.flip()
@@ -79,6 +96,8 @@ class AlienInvasion:
             # Watch for keyboard and mouse events.
             self._check_events()
             self.ship.update()
+            # 子弹的循环
+            self.bullets.update()
             # 重构代码很重要，看起来更简介
             self._update_screen()
 
